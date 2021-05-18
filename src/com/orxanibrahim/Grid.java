@@ -1,9 +1,9 @@
 package com.orxanibrahim;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Grid {
     private final int gridSize;
@@ -20,6 +20,12 @@ public class Grid {
         }
     }
 
+    private enum Direction{
+        HORIZONTAL,
+        VERTICAL,
+        DIAGONAL
+    }
+
     public Grid(int gridSize) {
         contents = new char[gridSize][gridSize];
         this.gridSize = gridSize;
@@ -32,15 +38,29 @@ public class Grid {
     }
 
     public void fillGrid(List<String> words) {
+        Collections.shuffle(coordinates);
         for (String word : words) {
-            Collections.shuffle(coordinates);
-
             for (Coordinate coordinate : coordinates) {
                 int x = coordinate.x;
                 int y = coordinate.y;
-                if (doesFit(word,coordinate)) {
-                    for (char c : word.toCharArray()) {
-                        contents[x][y++] = c;
+                Direction selectedDirection = getDirectionForFit(word,coordinate);
+                if (selectedDirection != null) {
+                    switch (selectedDirection){
+                        case HORIZONTAL:
+                            for (char c : word.toCharArray()) {
+                                contents[x][y++] = c;
+                            }
+                            break;
+                        case VERTICAL:
+                            for (char c : word.toCharArray()) {
+                                contents[x++][y] = c;
+                            }
+                            break;
+                        case DIAGONAL:
+                            for (char c : word.toCharArray()) {
+                                contents[x++][y++] = c;
+                            }
+                            break;
                     }
                     break;
                 }
@@ -58,13 +78,40 @@ public class Grid {
         }
     }
 
-    private boolean doesFit(String word, Coordinate coordinate) {
-        if (coordinate.y + word.length() < gridSize) {
-            for (int i = 0; i < word.length(); i++) {
-                if (contents[coordinate.x][coordinate.y + i] != '_') return false;
+    private Direction getDirectionForFit(String word, Coordinate coordinate) {
+        List<Direction> directionList = Arrays.asList(Direction.values());
+        Collections.shuffle(directionList);
+        for(Direction direction:directionList){
+            if(doesFit(word,coordinate,direction)){
+                return direction;
             }
-            return true;
         }
-        return false;
+        return null;
+    }
+
+    private boolean doesFit(String word, Coordinate coordinate,Direction direction){
+        int wordLength = word.length();
+
+        switch (direction){
+            case HORIZONTAL:
+                if(coordinate.y+ wordLength >gridSize)return false;
+                for(int i=0;i< wordLength;i++){
+                    if(contents[coordinate.x][coordinate.y+i]!='_')return false;
+                }
+                break;
+            case VERTICAL:
+                if(coordinate.x+ wordLength >gridSize)return false;
+                for(int i=0;i< wordLength;i++){
+                    if(contents[coordinate.x+i][coordinate.y]!='_')return false;
+                }
+                break;
+            case DIAGONAL:
+                if(coordinate.y+ wordLength >gridSize||coordinate.x+ wordLength >gridSize)return false;
+                for(int i=0;i< wordLength;i++){
+                    if(contents[coordinate.x+i][coordinate.y+i]!='_')return false;
+                }
+                break;
+        }
+        return true;
     }
 }
