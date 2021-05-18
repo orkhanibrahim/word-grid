@@ -103,7 +103,7 @@ public class Grid {
         String allCapLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         for (int i = 0; i < gridSize; i++) {
             for (int j = 0; j < gridSize; j++) {
-                if(contents[i][j]=='_'){
+                if (contents[i][j] == '_') {
                     int randomIndex = ThreadLocalRandom.current().nextInt(0, allCapLetters.length());
                     contents[i][j] = allCapLetters.charAt(randomIndex);
                 }
